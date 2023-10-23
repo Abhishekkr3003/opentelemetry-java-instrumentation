@@ -64,7 +64,7 @@ public final class RpcClientMetrics implements OperationListener {
             .setDescription("Size of RPC client response bodies")
             .ofLongs();
     RpcMetricsAdvice.applyClientSizeAdvice(clientResponseSizeBuilder);
-    clientResponseSizeHistogram = clientRequestSizeBuilder.build();
+    clientResponseSizeHistogram = clientResponseSizeBuilder.build();
   }
 
   /**

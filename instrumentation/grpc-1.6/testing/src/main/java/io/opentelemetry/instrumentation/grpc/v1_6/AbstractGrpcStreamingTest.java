@@ -178,6 +178,8 @@ public abstract class AbstractGrpcStreamingTest {
                             .hasNoParent()
                             .hasAttributesSatisfyingExactly(
                                 addExtraClientAttributes(
+                                    equalTo(SemanticAttributes.MESSAGE_UNCOMPRESSED_SIZE, 8),
+                                    equalTo(SemanticAttributes.MESSAGE_COMPRESSED_SIZE, 8),
                                     equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
                                     equalTo(SemanticAttributes.RPC_SERVICE, "example.Greeter"),
                                     equalTo(SemanticAttributes.RPC_METHOD, "Conversation"),
@@ -243,6 +245,63 @@ public abstract class AbstractGrpcStreamingTest {
                     metric ->
                         assertThat(metric)
                             .hasUnit("ms")
+                            .hasHistogramSatisfying(
+                                histogram ->
+                                    histogram.hasPointsSatisfying(
+                                        point ->
+                                            point.hasAttributesSatisfying(
+                                                equalTo(
+                                                    SemanticAttributes.NET_PEER_NAME, "localhost"),
+                                                equalTo(
+                                                    SemanticAttributes.NET_PEER_PORT,
+                                                    server.getPort()),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_METHOD, "Conversation"),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_SERVICE,
+                                                    "example.Greeter"),
+                                                equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_GRPC_STATUS_CODE,
+                                                    (long) Status.Code.OK.value()))))));
+
+    testing()
+        .waitAndAssertMetrics(
+            "io.opentelemetry.grpc-1.6",
+            "rpc.client.request.size",
+            metrics ->
+                metrics.anySatisfy(
+                    metric ->
+                        assertThat(metric)
+                            .hasUnit("By")
+                            .hasHistogramSatisfying(
+                                histogram ->
+                                    histogram.hasPointsSatisfying(
+                                        point ->
+                                            point.hasAttributesSatisfying(
+                                                equalTo(
+                                                    SemanticAttributes.NET_PEER_NAME, "localhost"),
+                                                equalTo(
+                                                    SemanticAttributes.NET_PEER_PORT,
+                                                    server.getPort()),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_METHOD, "Conversation"),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_SERVICE,
+                                                    "example.Greeter"),
+                                                equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                                equalTo(
+                                                    SemanticAttributes.RPC_GRPC_STATUS_CODE,
+                                                    (long) Status.Code.OK.value()))))));
+    testing()
+        .waitAndAssertMetrics(
+            "io.opentelemetry.grpc-1.6",
+            "rpc.client.response.size",
+            metrics ->
+                metrics.anySatisfy(
+                    metric ->
+                        assertThat(metric)
+                            .hasUnit("By")
                             .hasHistogramSatisfying(
                                 histogram ->
                                     histogram.hasPointsSatisfying(

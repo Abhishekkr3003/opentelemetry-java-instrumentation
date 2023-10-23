@@ -44,12 +44,16 @@ class RpcClientMetricsTest {
             .put(SemanticAttributes.NET_PEER_NAME, "example.com")
             .put(SemanticAttributes.NET_PEER_PORT, 8080)
             .put(SemanticAttributes.NET_TRANSPORT, "ip_tcp")
+            .put(SemanticAttributes.MESSAGE_COMPRESSED_SIZE, 8)
+            .put(SemanticAttributes.MESSAGE_UNCOMPRESSED_SIZE, 8)
             .build();
 
     Attributes responseAttributes2 =
         Attributes.builder()
             .put(SemanticAttributes.NET_PEER_PORT, 8080)
             .put(SemanticAttributes.NET_TRANSPORT, "ip_tcp")
+            .put(SemanticAttributes.MESSAGE_COMPRESSED_SIZE, 8)
+            .put(SemanticAttributes.MESSAGE_UNCOMPRESSED_SIZE, 8)
             .build();
 
     Context parent =
@@ -98,6 +102,56 @@ class RpcClientMetricsTest {
                                             exemplar ->
                                                 exemplar
                                                     .hasTraceId("ff01020304050600ff0a0b0c0d0e0f00")
+                                                    .hasSpanId("090a0b0c0d0e0f00")))),
+            metric ->
+                assertThat(metric)
+                    .hasName("rpc.client.request.size")
+                    .hasUnit("By")
+                    .hasHistogramSatisfying(
+                        histogram ->
+                            histogram.hasPointsSatisfying(
+                                point ->
+                                    point
+                                        .hasSum(8 /* Bytes */)
+                                        .hasAttributesSatisfying(
+                                            equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                            equalTo(
+                                                SemanticAttributes.RPC_SERVICE,
+                                                "myservice.EchoService"),
+                                            equalTo(SemanticAttributes.RPC_METHOD, "exampleMethod"),
+                                            equalTo(
+                                                SemanticAttributes.NET_PEER_NAME, "example.com"),
+                                            equalTo(SemanticAttributes.NET_PEER_PORT, 8080),
+                                            equalTo(SemanticAttributes.NET_TRANSPORT, "ip_tcp"))
+                                        .hasExemplarsSatisfying(
+                                            exemplar ->
+                                                exemplar
+                                                    .hasTraceId("ff01020304050600ff0a0b0c0d0e0f00")
+                                                    .hasSpanId("090a0b0c0d0e0f00")))),
+            metric ->
+                assertThat(metric)
+                    .hasName("rpc.client.response.size")
+                    .hasUnit("By")
+                    .hasHistogramSatisfying(
+                        histogram ->
+                            histogram.hasPointsSatisfying(
+                                point ->
+                                    point
+                                        .hasSum(8 /* Bytes */)
+                                        .hasAttributesSatisfying(
+                                            equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                            equalTo(
+                                                SemanticAttributes.RPC_SERVICE,
+                                                "myservice.EchoService"),
+                                            equalTo(SemanticAttributes.RPC_METHOD, "exampleMethod"),
+                                            equalTo(
+                                                SemanticAttributes.NET_PEER_NAME, "example.com"),
+                                            equalTo(SemanticAttributes.NET_PEER_PORT, 8080),
+                                            equalTo(SemanticAttributes.NET_TRANSPORT, "ip_tcp"))
+                                        .hasExemplarsSatisfying(
+                                            exemplar ->
+                                                exemplar
+                                                    .hasTraceId("ff01020304050600ff0a0b0c0d0e0f00")
                                                     .hasSpanId("090a0b0c0d0e0f00")))));
 
     listener.onEnd(context2, responseAttributes2, nanos(300));
@@ -114,6 +168,42 @@ class RpcClientMetricsTest {
                                 point ->
                                     point
                                         .hasSum(150 /* millis */)
+                                        .hasAttributesSatisfying(
+                                            equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                            equalTo(
+                                                SemanticAttributes.RPC_SERVICE,
+                                                "myservice.EchoService"),
+                                            equalTo(SemanticAttributes.RPC_METHOD, "exampleMethod"),
+                                            equalTo(SemanticAttributes.NET_PEER_PORT, 8080),
+                                            equalTo(SemanticAttributes.NET_TRANSPORT, "ip_tcp")))),
+            metric ->
+                assertThat(metric)
+                    .hasName("rpc.client.request.size")
+                    .hasUnit("By")
+                    .hasHistogramSatisfying(
+                        histogram ->
+                            histogram.hasPointsSatisfying(
+                                point ->
+                                    point
+                                        .hasSum(8 /* Bytes */)
+                                        .hasAttributesSatisfying(
+                                            equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
+                                            equalTo(
+                                                SemanticAttributes.RPC_SERVICE,
+                                                "myservice.EchoService"),
+                                            equalTo(SemanticAttributes.RPC_METHOD, "exampleMethod"),
+                                            equalTo(SemanticAttributes.NET_PEER_PORT, 8080),
+                                            equalTo(SemanticAttributes.NET_TRANSPORT, "ip_tcp")))),
+            metric ->
+                assertThat(metric)
+                    .hasName("rpc.client.response.size")
+                    .hasUnit("By")
+                    .hasHistogramSatisfying(
+                        histogram ->
+                            histogram.hasPointsSatisfying(
+                                point ->
+                                    point
+                                        .hasSum(8 /* Bytes */)
                                         .hasAttributesSatisfying(
                                             equalTo(SemanticAttributes.RPC_SYSTEM, "grpc"),
                                             equalTo(
