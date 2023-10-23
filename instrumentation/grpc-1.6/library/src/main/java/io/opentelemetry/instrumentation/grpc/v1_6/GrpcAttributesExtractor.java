@@ -38,8 +38,10 @@ final class GrpcAttributesExtractor implements AttributesExtractor<GrpcRequest, 
       GrpcRequest request,
       @Nullable Status status,
       @Nullable Throwable error) {
+    attributes.put(SemanticAttributes.MESSAGE_COMPRESSED_SIZE, request.getRequestSize());
     if (status != null) {
       attributes.put(SemanticAttributes.RPC_GRPC_STATUS_CODE, status.getCode().value());
+      attributes.put(SemanticAttributes.MESSAGE_UNCOMPRESSED_SIZE, request.getResponseSize());
     }
     for (String key : capturedRequestMetadata) {
       List<String> value = getter.metadataValue(request, key);

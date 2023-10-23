@@ -9,6 +9,7 @@ import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
 import io.grpc.ClientInterceptor;
+import io.grpc.ClientStreamTracer;
 import io.grpc.ForwardingClientCall;
 import io.grpc.ForwardingClientCallListener;
 import io.grpc.Grpc;
@@ -47,13 +48,14 @@ final class TracingClientInterceptor implements ClientInterceptor {
     if (!instrumenter.shouldStart(parentContext, request)) {
       return next.newCall(method, callOptions);
     }
-
+    ClientStreamTracer.Factory sizeTracerFactory = SizeClientStreamTracer.newFactory(request);
+    CallOptions tracerCallOption = callOptions.withStreamTracerFactory(sizeTracerFactory);
     Context context = instrumenter.start(parentContext, request);
     ClientCall<REQUEST, RESPONSE> result;
     try (Scope ignored = context.makeCurrent()) {
       try {
         // call other interceptors
-        result = next.newCall(method, callOptions);
+        result = next.newCall(method, tracerCallOption);
       } catch (Throwable e) {
         instrumenter.end(context, request, Status.UNKNOWN, e);
         throw e;

@@ -5,12 +5,16 @@
 
 package io.opentelemetry.instrumentation.api.instrumenter.rpc;
 
+import static io.opentelemetry.instrumentation.api.instrumenter.rpc.RpcMessageBodySizeUtil.getRpcRequestBodySize;
+import static io.opentelemetry.instrumentation.api.instrumenter.rpc.RpcMessageBodySizeUtil.getRpcResponseBodySize;
 import static java.util.logging.Level.FINE;
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.DoubleHistogramBuilder;
+import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.metrics.LongHistogramBuilder;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
@@ -34,6 +38,8 @@ public final class RpcClientMetrics implements OperationListener {
   private static final Logger logger = Logger.getLogger(RpcClientMetrics.class.getName());
 
   private final DoubleHistogram clientDurationHistogram;
+  private final LongHistogram clientRequestSizeHistogram;
+  private final LongHistogram clientResponseSizeHistogram;
 
   private RpcClientMetrics(Meter meter) {
     DoubleHistogramBuilder durationBuilder =
@@ -43,6 +49,22 @@ public final class RpcClientMetrics implements OperationListener {
             .setUnit("ms");
     RpcMetricsAdvice.applyClientDurationAdvice(durationBuilder);
     clientDurationHistogram = durationBuilder.build();
+    LongHistogramBuilder clientRequestSizeBuilder =
+        meter
+            .histogramBuilder("rpc.client.request.size")
+            .setUnit("By")
+            .setDescription("Size of RPC client request bodies")
+            .ofLongs();
+    RpcMetricsAdvice.applyClientSizeAdvice(clientRequestSizeBuilder);
+    clientRequestSizeHistogram = clientRequestSizeBuilder.build();
+    LongHistogramBuilder clientResponseSizeBuilder =
+        meter
+            .histogramBuilder("rpc.client.response.size")
+            .setUnit("By")
+            .setDescription("Size of RPC client response bodies")
+            .ofLongs();
+    RpcMetricsAdvice.applyClientSizeAdvice(clientResponseSizeBuilder);
+    clientResponseSizeHistogram = clientRequestSizeBuilder.build();
   }
 
   /**
@@ -71,10 +93,20 @@ public final class RpcClientMetrics implements OperationListener {
           context);
       return;
     }
+    Attributes mergedAttributes = state.startAttributes().toBuilder().putAll(endAttributes).build();
     clientDurationHistogram.record(
         (endNanos - state.startTimeNanos()) / NANOS_PER_MS,
-        state.startAttributes().toBuilder().putAll(endAttributes).build(),
+        mergedAttributes,
         context);
+    Long requestBodySize = getRpcRequestBodySize(endAttributes);
+    if (requestBodySize != null) {
+      clientRequestSizeHistogram.record(requestBodySize, mergedAttributes, context);
+    }
+
+    Long responseBodySize = getRpcResponseBodySize(endAttributes);
+    if (responseBodySize != null) {
+      clientResponseSizeHistogram.record(responseBodySize, mergedAttributes, context);
+    }
   }
 
   @AutoValue
