@@ -30,7 +30,8 @@ public class AerospikeClientInstrumentationModule extends InstrumentationModule 
   public List<TypeInstrumentation> typeInstrumentations() {
     return asList(
         new AerospikeClientSyncCommandInstrumentation(),
-        new AerospikeNodeInstrumentation()
+        new AerospikeNodeInstrumentation(),
+        new AerospikeDataSizeIntrumentation()
     );
   }
 

@@ -12,6 +12,7 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class AerospikeRequest {
   private Node node;
+  private Integer size;
 
   public static AerospikeRequest create(Command command, Key key) {
     return new AutoValue_AerospikeRequest(command, key);
@@ -55,5 +56,13 @@ public abstract class AerospikeRequest {
       return key.userKey.toString();
     }
     return null;
+  }
+
+  public Integer getSize() {
+    return size;
+  }
+
+  public void setSize(Integer size) {
+    this.size = size;
   }
 }

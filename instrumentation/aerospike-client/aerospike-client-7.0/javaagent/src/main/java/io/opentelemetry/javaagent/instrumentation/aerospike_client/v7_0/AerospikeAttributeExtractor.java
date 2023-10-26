@@ -34,6 +34,10 @@ public class AerospikeAttributeExtractor implements
     } else {
       attributes.put(AerospikeSemanticAttributes.AEROSPIKE_STATUS, SUCCESS.name());
       attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0);
+      if(aerospikeRequest.getSize() != null) {
+        attributes.put(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE,
+            aerospikeRequest.getSize());
+      }
     }
   }
 }

@@ -1,0 +1,45 @@
+package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
+
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperClass;
+import static net.bytebuddy.matcher.ElementMatchers.isMethod;
+import static net.bytebuddy.matcher.ElementMatchers.isPublic;
+import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.takesNoArguments;
+
+import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
+import io.opentelemetry.javaagent.extension.instrumentation.TypeTransformer;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
+
+public class AerospikeDataSizeIntrumentation implements TypeInstrumentation {
+  @Override
+  public ElementMatcher<TypeDescription> typeMatcher() {
+    return hasSuperClass(named("com.aerospike.client.command.SyncCommand"));
+  }
+
+  @Override
+  public void transform(TypeTransformer transformer) {
+    transformer.applyAdviceToMethod(
+        isMethod()
+            .and(isPublic())
+            .and(named("execute"))
+            .and(takesNoArguments()),
+        this.getClass().getName() + "$SizeAdvice");
+  }
+
+  @SuppressWarnings("unused")
+  public static class SizeAdvice {
+    @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
+    public static void stopSpan(
+        @Advice.FieldValue("dataOffset") int dataOffset) {
+      System.out.println("Instrtumenting size");
+      AerospikeRequestContext context = AerospikeRequestContext.current();
+      if (context != null) {
+        AerospikeRequest request = context.getRequest();
+        request.setSize(dataOffset);
+      }
+      System.out.println("exiting get exit");
+    }
+  }
+}

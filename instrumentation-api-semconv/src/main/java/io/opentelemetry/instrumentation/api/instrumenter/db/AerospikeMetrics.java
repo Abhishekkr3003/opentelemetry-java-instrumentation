@@ -1,5 +1,6 @@
 package io.opentelemetry.instrumentation.api.instrumenter.db;
 
+import static io.opentelemetry.instrumentation.api.instrumenter.db.DbMessageSizeUtil.getMessageSize;
 import static java.util.logging.Level.FINE;
 
 import com.google.auto.value.AutoValue;
@@ -63,7 +64,7 @@ public final class AerospikeMetrics implements OperationListener {
         meter
             .histogramBuilder("aerospike.record.size")
             .setDescription("Aerospike Record Size")
-            .setUnit("ms");
+            .setUnit("By");
     AerospikeMetricsAdvice.applyRecordSizeAdvice(recordSizeHistogramBuilder);
     recordSizeHistogram = durationBuilder.build();
   }
@@ -98,10 +99,10 @@ public final class AerospikeMetrics implements OperationListener {
         (endNanos - state.startTimeNanos()) / NANOS_PER_MS,
         mergedAttributes,
         context);
-//    Long requestBodySize = getRpcRequestBodySize(endAttributes);
-//    if (requestBodySize != null) {
-//      clientRequestSizeHistogram.record(requestBodySize, mergedAttributes, context);
-//    }
+    Long requestBodySize = getMessageSize(mergedAttributes);
+    if (requestBodySize != null) {
+      recordSizeHistogram.record(requestBodySize, mergedAttributes, context);
+    }
   }
 
   @AutoValue
