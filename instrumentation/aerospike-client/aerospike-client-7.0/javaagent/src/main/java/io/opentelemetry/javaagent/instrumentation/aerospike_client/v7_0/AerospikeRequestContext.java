@@ -11,10 +11,11 @@ import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 public final class AerospikeRequestContext {
   private static final ThreadLocal<AerospikeRequestContext> contextThreadLocal = new ThreadLocal<>();
   private AerospikeRequest request;
+  private Context context;
 
   private AerospikeRequestContext() {}
 
-  public static AerospikeRequestContext attach(AerospikeRequest request) {
+  public static AerospikeRequestContext attach(AerospikeRequest request, Context context) {
     AerospikeRequestContext requestContext = current();
     // if there already is an active request context don't start a new one
     if (requestContext != null) {
@@ -22,6 +23,7 @@ public final class AerospikeRequestContext {
     }
     requestContext = new AerospikeRequestContext();
     requestContext.request = request;
+    requestContext.context = context;
     contextThreadLocal.set(requestContext);
     return requestContext;
   }
@@ -52,11 +54,16 @@ public final class AerospikeRequestContext {
   }
 
   public void endSpan(
-      Instrumenter<AerospikeRequest, Void> instrumenter, Context context, AerospikeRequest request, Throwable throwable) {
+      Instrumenter<AerospikeRequest, Void> instrumenter, Context context, AerospikeRequest request,
+      Throwable throwable) {
     instrumenter.end(context, request, null, throwable);
   }
 
   public AerospikeRequest getRequest() {
     return request;
+  }
+
+  public Context getContext() {
+    return context;
   }
 }

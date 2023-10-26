@@ -29,22 +29,20 @@ public class AerospikeNodeInstrumentation implements TypeInstrumentation {
             .and(named("getNode"))
             .and(returns(named("com.aerospike.client.cluster.Node")))
             .and(takesNoArguments()),
-        this.getClass().getName() + "$NodeCommandAdvice");
+        this.getClass().getName() + "$NodeSyncCommandAdvice");
   }
 
   @SuppressWarnings("unused")
-  public static class NodeCommandAdvice {
+  public static class NodeSyncCommandAdvice {
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
     public static void stopSpan(
         @Advice.Return Node node) {
-      System.out.println("Instrtumenting node");
       AerospikeRequestContext context = AerospikeRequestContext.current();
       if (context != null) {
         AerospikeRequest request = context.getRequest();
         request.setNode(node);
       }
-      System.out.println("exiting get exit");
     }
   }
 }

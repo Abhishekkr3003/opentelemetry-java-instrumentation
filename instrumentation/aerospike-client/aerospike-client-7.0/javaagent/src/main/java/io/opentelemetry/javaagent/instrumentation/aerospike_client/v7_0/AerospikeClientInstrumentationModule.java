@@ -31,17 +31,15 @@ public class AerospikeClientInstrumentationModule extends InstrumentationModule 
     return asList(
         new AerospikeClientSyncCommandInstrumentation(),
         new AerospikeNodeInstrumentation(),
-        new AerospikeDataSizeIntrumentation()
+        new AerospikeDataSizeIntrumentation(),
+        new AerospikeClientAsyncWriteCommandInstrumentation(),
+        new AerospikeClientAsyncHandlerInstrumentation(),
+        new AerospikeClientAsyncReadCommandInstrumentation()
     );
   }
 
   @Override
   public boolean isIndyModule() {
-    // java.lang.NoClassDefFoundError:
-    //      io/opentelemetry/javaagent/instrumentation/jedis/JedisRequestContext
-    //  at redis.clients.jedis.BinaryJedis.flushAll(BinaryJedis.java:595)
-    //  at io.opentelemetry.javaagent.instrumentation.jedis.v3_0
-    //       .Jedis30ClientTest.setup(Jedis30ClientTest.java:50)
     return false;
   }
 }

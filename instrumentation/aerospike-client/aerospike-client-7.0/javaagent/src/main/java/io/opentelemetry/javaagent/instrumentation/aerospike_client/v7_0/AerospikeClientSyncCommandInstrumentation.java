@@ -67,7 +67,6 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
-      System.out.println("Entering put enter");
       Context parentContext = currentContext();
       Key key = null;
       for (Object object : keys) {
@@ -75,15 +74,16 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
           key = (Key) object;
         }
       }
-      System.out.println(key);
+      if (key == null) {
+        return null;
+      }
       request = AerospikeRequest.create(methodName.toUpperCase(Locale.ROOT), key);
       if (!instrumenter().shouldStart(parentContext, request)) {
         return null;
       }
       context = instrumenter().start(parentContext, request);
       scope = context.makeCurrent();
-      System.out.println("Exiting put enter");
-      return AerospikeRequestContext.attach(request);
+      return AerospikeRequestContext.attach(request, context);
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
@@ -94,7 +94,6 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
-      System.out.println("Entering put exit");
       if (throwable != null) {
         request.setStatus(FAILURE);
       } else if (record == null) {
@@ -109,9 +108,8 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
       scope.close();
       if (requestContext != null) {
         requestContext.endSpan(instrumenter(), context, request, throwable);
+        requestContext.detachAndEnd();
       }
-      requestContext.detachAndEnd();
-      System.out.println("Exiting put exit");
     }
   }
 
@@ -125,7 +123,6 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
-      System.out.println("Entering put enter");
       Context parentContext = currentContext();
       Key key = null;
       for (Object object : keys) {
@@ -133,40 +130,40 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
           key = (Key) object;
         }
       }
-      System.out.println(key);
+      if (key == null) {
+        return null;
+      }
       request = AerospikeRequest.create(methodName.toUpperCase(Locale.ROOT), key);
       if (!instrumenter().shouldStart(parentContext, request)) {
         return null;
       }
       context = instrumenter().start(parentContext, request);
       scope = context.makeCurrent();
-      System.out.println("Exiting put enter");
-      return AerospikeRequestContext.attach(request);
+      return AerospikeRequestContext.attach(request, context);
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
-    public static void stopSpan(
+    public static AerospikeRequestContext stopSpan(
         @Advice.Thrown Throwable throwable,
         @Advice.Enter AerospikeRequestContext requestContext,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
-      System.out.println("Entering put exit");
       if (throwable != null) {
         request.setStatus(FAILURE);
       } else {
         request.setStatus(SUCCESS);
       }
       if (scope == null) {
-        return;
+        return requestContext;
       }
 
       scope.close();
       if (requestContext != null) {
         requestContext.endSpan(instrumenter(), context, request, throwable);
+        requestContext.detachAndEnd();
       }
-      requestContext.detachAndEnd();
-      System.out.println("Exiting put exit");
+      return requestContext;
     }
   }
 }

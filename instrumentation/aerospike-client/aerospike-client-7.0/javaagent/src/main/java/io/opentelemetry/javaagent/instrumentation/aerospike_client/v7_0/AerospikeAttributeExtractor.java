@@ -1,6 +1,7 @@
 package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
 
 import com.aerospike.client.AerospikeException;
+import com.aerospike.client.ResultCode;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
@@ -26,11 +27,15 @@ public class AerospikeAttributeExtractor implements
     attributes.put(AerospikeSemanticAttributes.AEROSPIKE_STATUS,
         aerospikeRequest.getStatus().name());
     if (error != null) {
-      AerospikeException aerospikeException = (AerospikeException) error;
-      attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE,
-          aerospikeException.getResultCode());
+      if (error instanceof AerospikeException) {
+        AerospikeException aerospikeException = (AerospikeException) error;
+        attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE,
+            aerospikeException.getResultCode());
+      } else {
+        attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, ResultCode.CLIENT_ERROR);
+      }
     } else {
-      attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0);
+      attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, ResultCode.OK);
       if (aerospikeRequest.getSize() != null) {
         attributes.put(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE,
             aerospikeRequest.getSize());

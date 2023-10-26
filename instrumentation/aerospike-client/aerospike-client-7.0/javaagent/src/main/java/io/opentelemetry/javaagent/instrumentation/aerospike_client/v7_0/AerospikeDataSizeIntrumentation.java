@@ -15,7 +15,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 public class AerospikeDataSizeIntrumentation implements TypeInstrumentation {
   @Override
   public ElementMatcher<TypeDescription> typeMatcher() {
-    return hasSuperClass(named("com.aerospike.client.command.SyncCommand"));
+    return hasSuperClass(named("com.aerospike.client.command.Command"));
   }
 
   @Override
@@ -33,13 +33,11 @@ public class AerospikeDataSizeIntrumentation implements TypeInstrumentation {
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
     public static void stopSpan(
         @Advice.FieldValue("dataOffset") int dataOffset) {
-      System.out.println("Instrtumenting size");
       AerospikeRequestContext context = AerospikeRequestContext.current();
       if (context != null) {
         AerospikeRequest request = context.getRequest();
         request.setSize(dataOffset);
       }
-      System.out.println("exiting get exit");
     }
   }
 }

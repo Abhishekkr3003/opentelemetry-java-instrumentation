@@ -27,12 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @SuppressWarnings("deprecation") // until old http semconv are dropped in 2.0
-class AerospikeClient70Test {
+class AerospikeClient70SyncCommandTest {
   @RegisterExtension
   static final InstrumentationExtension testing = AgentInstrumentationExtension.create();
-
-//  static GenericContainer<?> redisServer =
-//      new GenericContainer<>("redis:6.2.3-alpine").withExposedPorts(6379);
 
   static int port;
 
@@ -40,15 +37,12 @@ class AerospikeClient70Test {
 
   @BeforeAll
   static void setupSpec() {
-//    redisServer.start();
-//    port = redisServer.getMappedPort(6379);
     port = 3000;
     aerospikeClient = new AerospikeClient("localhost", port);
   }
 
   @AfterAll
   static void cleanupSpec() {
-//    redisServer.stop();
     aerospikeClient.close();
   }
 
@@ -68,7 +62,7 @@ class AerospikeClient70Test {
                 span ->
                     span.hasName("PUT")
                         .hasKind(SpanKind.CLIENT)
-                        .hasAttributesSatisfying(
+                        .hasAttributesSatisfyingExactly(
                             equalTo(SemanticAttributes.DB_SYSTEM, "aerospike"),
                             equalTo(SemanticAttributes.DB_OPERATION, "PUT"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
@@ -78,6 +72,7 @@ class AerospikeClient70Test {
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE, 95),
                             satisfies(
                                 SemanticAttributes.NET_SOCK_PEER_NAME,
                                 val -> val.isIn("localhost", "127.0.0.1")))));
@@ -96,7 +91,7 @@ class AerospikeClient70Test {
                 span ->
                     span.hasName("GET")
                         .hasKind(SpanKind.CLIENT)
-                        .hasAttributesSatisfying(
+                        .hasAttributesSatisfyingExactly(
                             equalTo(SemanticAttributes.DB_SYSTEM, "aerospike"),
                             equalTo(SemanticAttributes.DB_OPERATION, "GET"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
@@ -106,46 +101,9 @@ class AerospikeClient70Test {
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE, 40),
                             satisfies(
                                 SemanticAttributes.NET_SOCK_PEER_NAME,
                                 val -> val.isIn("localhost", "127.0.0.1")))));
   }
-//
-//  @Test
-//  void commandWithNoArguments() {
-//    jedis.set("foo", "bar");
-//    String value = jedis.randomKey();
-//
-//    assertThat(value).isEqualTo("foo");
-//
-//    testing.waitAndAssertTraces(
-//        trace ->
-//            trace.hasSpansSatisfyingExactly(
-//                span ->
-//                    span.hasName("SET")
-//                        .hasKind(SpanKind.CLIENT)
-//                        .hasAttributesSatisfyingExactly(
-//                            equalTo(SemanticAttributes.DB_SYSTEM, "redis"),
-//                            equalTo(SemanticAttributes.DB_STATEMENT, "SET foo ?"),
-//                            equalTo(SemanticAttributes.DB_OPERATION, "SET"),
-//                            equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
-//                            equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
-//                            satisfies(
-//                                SemanticAttributes.NET_SOCK_PEER_NAME,
-//                                val -> val.isIn("localhost", "127.0.0.1")))),
-//        trace ->
-//            trace.hasSpansSatisfyingExactly(
-//                span ->
-//                    span.hasName("RANDOMKEY")
-//                        .hasKind(SpanKind.CLIENT)
-//                        .hasAttributesSatisfyingExactly(
-//                            equalTo(SemanticAttributes.DB_SYSTEM, "redis"),
-//                            equalTo(SemanticAttributes.DB_STATEMENT, "RANDOMKEY"),
-//                            equalTo(SemanticAttributes.DB_OPERATION, "RANDOMKEY"),
-//                            equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
-//                            equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
-//                            satisfies(
-//                                SemanticAttributes.NET_SOCK_PEER_NAME,
-//                                val -> val.isIn("localhost", "127.0.0.1")))));
-//  }
 }
