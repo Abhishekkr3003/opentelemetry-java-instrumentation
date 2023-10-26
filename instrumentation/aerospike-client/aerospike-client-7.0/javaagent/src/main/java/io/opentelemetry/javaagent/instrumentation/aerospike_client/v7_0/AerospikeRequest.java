@@ -15,17 +15,13 @@ public abstract class AerospikeRequest {
   private Integer size;
   private Status status;
 
-  public static AerospikeRequest create(Command command, Key key) {
-    return new AutoValue_AerospikeRequest(command, key);
+  public static AerospikeRequest create(String operation, Key key) {
+    return new AutoValue_AerospikeRequest(operation, key);
   }
 
-  public abstract Command getCommand();
+  public abstract String getOperation();
 
   public abstract Key getKey();
-
-  public String getOperation() {
-    return getCommand().name();
-  }
 
   public void setNode(Node node) {
     this.node = node;
