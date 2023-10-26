@@ -1,8 +1,5 @@
 package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
 
-import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Status.FAILURE;
-import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Status.SUCCESS;
-
 import com.aerospike.client.AerospikeException;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.context.Context;
@@ -26,15 +23,15 @@ public class AerospikeAttributeExtractor implements
   @Override
   public void onEnd(AttributesBuilder attributes, Context context,
       AerospikeRequest aerospikeRequest, @Nullable Void unused, @Nullable Throwable error) {
+    attributes.put(AerospikeSemanticAttributes.AEROSPIKE_STATUS,
+        aerospikeRequest.getStatus().name());
     if (error != null) {
-      attributes.put(AerospikeSemanticAttributes.AEROSPIKE_STATUS, FAILURE.name());
       AerospikeException aerospikeException = (AerospikeException) error;
       attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE,
           aerospikeException.getResultCode());
     } else {
-      attributes.put(AerospikeSemanticAttributes.AEROSPIKE_STATUS, SUCCESS.name());
       attributes.put(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0);
-      if(aerospikeRequest.getSize() != null) {
+      if (aerospikeRequest.getSize() != null) {
         attributes.put(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE,
             aerospikeRequest.getSize());
       }

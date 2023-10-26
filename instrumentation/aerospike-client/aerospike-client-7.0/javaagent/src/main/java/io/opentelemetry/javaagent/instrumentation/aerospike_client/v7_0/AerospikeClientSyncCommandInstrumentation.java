@@ -9,6 +9,9 @@ import static io.opentelemetry.javaagent.bootstrap.Java8BytecodeBridge.currentCo
 import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.AersopikeSingletons.instrumenter;
 import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Command.GET;
 import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Command.PUT;
+import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Status.FAILURE;
+import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Status.RECORD_NOT_FOUND;
+import static io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0.Status.SUCCESS;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -16,6 +19,7 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
@@ -74,6 +78,7 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
     public static void stopSpan(
+        @Advice.Return Record record,
         @Advice.Thrown Throwable throwable,
         @Advice.Enter AerospikeRequestContext requestContext,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
@@ -81,6 +86,13 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         @Advice.Local("otelScope") Scope scope) {
 
       System.out.println("Entering get exit");
+      if (throwable != null) {
+        request.setStatus(FAILURE);
+      } else if (record == null) {
+        request.setStatus(RECORD_NOT_FOUND);
+      } else {
+        request.setStatus(SUCCESS);
+      }
       if (scope == null) {
         return;
       }
@@ -124,6 +136,11 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
       System.out.println("Entering put exit");
+      if (throwable != null) {
+        request.setStatus(FAILURE);
+      } else {
+        request.setStatus(SUCCESS);
+      }
       if (scope == null) {
         return;
       }

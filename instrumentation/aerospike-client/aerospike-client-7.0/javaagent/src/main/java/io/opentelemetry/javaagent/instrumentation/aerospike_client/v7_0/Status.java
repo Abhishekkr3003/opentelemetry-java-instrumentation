@@ -2,5 +2,6 @@ package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
 
 public enum Status {
   SUCCESS,
-  FAILURE;
+  FAILURE,
+  RECORD_NOT_FOUND;
 }
