@@ -16,7 +16,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.aerospike.client.Key;
-import com.aerospike.client.cluster.Cluster;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
@@ -34,20 +33,19 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
   @Override
   public void transform(TypeTransformer transformer) {
     transformer.applyAdviceToMethod(
-        isMethod().and(isPublic())
+        isMethod()
+            .and(isPublic())
             .and(named("get"))
-            .and(takesArguments(3))
-            .and(takesArgument(0, named("com.aerospike.client.policy.Policy")))
+            .and(takesArguments(3).or(takesArguments(2)))
             .and(takesArgument(1, named("com.aerospike.client.Key"))),
         this.getClass().getName() + "$GetCommandAdvice");
 
     transformer.applyAdviceToMethod(
         isMethod()
+            .and(isPublic())
             .and(named("put"))
-            .and(takesArguments(3)).and(isPublic())
-            .and(takesArgument(0, named("com.aerospike.client.policy.WritePolicy")))
-            .and(takesArgument(1, named("com.aerospike.client.Key")))
-        ,
+            .and(takesArguments(3).or(takesArguments(2)))
+            .and(takesArgument(1, named("com.aerospike.client.Key"))),
 
         this.getClass().getName() + "$PutCommandAdvice");
   }
@@ -55,40 +53,44 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
   @SuppressWarnings("unused")
   public static class GetCommandAdvice {
     @Advice.OnMethodEnter(suppress = Throwable.class)
-    public static void onEnter(
+    public static AerospikeRequestContext onEnter(
         @Advice.Argument(1) Key key,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
+
       System.out.println("Entering get enter");
-//      AerospikeRequestContext<T> aerospikeRequestContext = AerospikeRequestContext.attach();
       Context parentContext = currentContext();
       request = AerospikeRequest.create(GET, key);
       if (!instrumenter().shouldStart(parentContext, request)) {
-        return;
+        return null;
       }
 
       context = instrumenter().start(parentContext, request);
       scope = context.makeCurrent();
       System.out.println("Exiting get enter");
-//      return aerospikeRequestContext;
+      return AerospikeRequestContext.attach(request);
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
     public static void stopSpan(
         @Advice.Thrown Throwable throwable,
-        @Advice.FieldValue("cluster") Cluster cluster,
+        @Advice.Enter AerospikeRequestContext requestContext,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
+
       System.out.println("Entering get exit");
-      request.setCluster(cluster);
       if (scope == null) {
         return;
       }
 
       scope.close();
-      AerospikeRequestContext.endIfNotAttached(instrumenter(), context, request, throwable);
+      if (requestContext != null) {
+        requestContext.endSpan(instrumenter(), context, request, throwable);
+      }
+      requestContext.detachAndEnd();
+
       System.out.println("exiting get exit");
     }
   }
@@ -97,7 +99,7 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
   public static class PutCommandAdvice {
 
     @Advice.OnMethodEnter(suppress = Throwable.class)
-    public static void onEnter(
+    public static AerospikeRequestContext onEnter(
         @Advice.Argument(1) Key key,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
@@ -106,28 +108,31 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
       Context parentContext = currentContext();
       request = AerospikeRequest.create(PUT, key);
       if (!instrumenter().shouldStart(parentContext, request)) {
-        return;
+        return null;
       }
       context = instrumenter().start(parentContext, request);
       scope = context.makeCurrent();
       System.out.println("Exiting put enter");
+      return AerospikeRequestContext.attach(request);
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
     public static void stopSpan(
         @Advice.Thrown Throwable throwable,
-        @Advice.FieldValue("cluster") Cluster cluster,
+        @Advice.Enter AerospikeRequestContext requestContext,
         @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope) {
       System.out.println("Entering put exit");
-      request.setCluster(cluster);
       if (scope == null) {
         return;
       }
 
       scope.close();
-      AerospikeRequestContext.endIfNotAttached(instrumenter(), context, request, throwable);
+      if (requestContext != null) {
+        requestContext.endSpan(instrumenter(), context, request, throwable);
+      }
+      requestContext.detachAndEnd();
       System.out.println("Exiting put exit");
     }
   }

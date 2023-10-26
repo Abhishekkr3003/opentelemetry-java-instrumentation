@@ -15,6 +15,7 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.instrumentation.api.instrumenter.db.AerospikeSemanticAttributes;
 import io.opentelemetry.instrumentation.testing.junit.AgentInstrumentationExtension;
 import io.opentelemetry.instrumentation.testing.junit.InstrumentationExtension;
 import io.opentelemetry.semconv.SemanticAttributes;
@@ -72,11 +73,11 @@ class AerospikeClient70Test {
                             equalTo(SemanticAttributes.DB_OPERATION, "PUT"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME, "test-set"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME, "test-set"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
                             satisfies(
                                 SemanticAttributes.NET_SOCK_PEER_NAME,
                                 val -> val.isIn("localhost", "127.0.0.1")))));
@@ -100,11 +101,11 @@ class AerospikeClient70Test {
                             equalTo(SemanticAttributes.DB_OPERATION, "GET"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME, "test-set"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
-//                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME, "test-set"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY, "data1"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
                             satisfies(
                                 SemanticAttributes.NET_SOCK_PEER_NAME,
                                 val -> val.isIn("localhost", "127.0.0.1")))));
