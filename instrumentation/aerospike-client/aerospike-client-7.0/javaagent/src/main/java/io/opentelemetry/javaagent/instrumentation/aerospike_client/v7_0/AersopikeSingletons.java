@@ -11,10 +11,8 @@ import io.opentelemetry.instrumentation.api.instrumenter.SpanKindExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.db.AerospikeMetrics;
 import io.opentelemetry.instrumentation.api.instrumenter.db.DbClientAttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.db.DbClientSpanNameExtractor;
-import io.opentelemetry.instrumentation.api.instrumenter.net.PeerServiceAttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.network.NetworkAttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.network.ServerAttributesExtractor;
-import io.opentelemetry.javaagent.bootstrap.internal.CommonConfig;
 
 public final class AersopikeSingletons {
   private static final String INSTRUMENTATION_NAME = "io.opentelemetry.aerospike-client-7.0";
@@ -34,9 +32,6 @@ public final class AersopikeSingletons {
             .addAttributesExtractor(DbClientAttributesExtractor.create(dbAttributesGetter))
             .addAttributesExtractor(ServerAttributesExtractor.create(netAttributesGetter))
             .addAttributesExtractor(NetworkAttributesExtractor.create(netAttributesGetter))
-            .addAttributesExtractor(
-                PeerServiceAttributesExtractor.create(
-                    netAttributesGetter, CommonConfig.get().getPeerServiceResolver()))
             .addOperationMetrics(AerospikeMetrics.get())
             .buildInstrumenter(SpanKindExtractor.alwaysClient());
   }

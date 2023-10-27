@@ -33,8 +33,8 @@ public class AerospikeClientInstrumentationModule extends InstrumentationModule 
         new SocketInstrumentation(),
         new TransferSizeIntrumentation(),
         new AsyncCommandInstrumentation(),
-        new AsyncHandlerInstrumentation()
-//        new AerospikeClientAsyncReadCommandInstrumentation()
+        new AsyncHandlerInstrumentation(),
+        new AsyncScanAllCommandInstrumentation()
     );
   }
 
