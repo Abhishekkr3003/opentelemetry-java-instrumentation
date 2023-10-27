@@ -49,8 +49,6 @@ public class AsyncCommandInstrumentation implements TypeInstrumentation {
         @Advice.Local("otelContext") Context context,
         @Advice.Local("otelScope") Scope scope,
         @Advice.AllArguments Object[] objects) {
-      System.out.println("Constructor Advice");
-      System.out.println(command);
       Key key = null;
       for (Object object : objects) {
         if (object instanceof Key) {
@@ -61,34 +59,27 @@ public class AsyncCommandInstrumentation implements TypeInstrumentation {
       if (key == null) {
         return;
       }
-      System.out.println("has key also");
       VirtualField<Command, AerospikeRequestContext> virtualField = VirtualField.find(Command.class,
           AerospikeRequestContext.class);
       AerospikeRequestContext requestContext = virtualField.get(command);
       if (requestContext != null) {
         return;
       }
-      System.out.println("has reqContext as null");
       Context parentContext = currentContext();
-      System.out.println(parentContext);
       request = AerospikeRequest.create(command.getClass().getSimpleName().toUpperCase(Locale.ROOT),
           key);
       if (!instrumenter().shouldStart(parentContext, request)) {
         return;
       }
       context = instrumenter().start(parentContext, request);
-      System.out.println("here context" + context);
       AerospikeRequestContext aerospikeRequestContext = AerospikeRequestContext.attach(request,
           context);
-      System.out.println(aerospikeRequestContext.getContext());
       scope = context.makeCurrent();
 
-      VirtualField.find(Command.class, AerospikeRequestContext.class)
-          .set(command, aerospikeRequestContext);
+      virtualField.set(command, aerospikeRequestContext);
       if (scope != null) {
         scope.close();
       }
-      System.out.println(aerospikeRequestContext.getContext());
     }
   }
 }

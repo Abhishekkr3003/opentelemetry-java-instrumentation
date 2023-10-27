@@ -28,22 +28,6 @@ public final class AerospikeRequestContext {
     contextThreadLocal.remove();
   }
 
-  /**
-   * Schedule ending of instrumented operation when current {@link AerospikeRequestContext} is closed.
-   */
-//  public static <T> void endIfNotAttached(
-//      Instrumenter<T, Void> instrumenter, Context context, T request, Throwable throwable) {
-//    AerospikeRequestContext<T> requestContext = current();
-//    if (requestContext == null || requestContext.request != null) {
-//      // end the span immediately if we are already tracking a request
-//      endSpan(instrumenter, context, request, throwable);
-//    } else {
-//      requestContext.instrumenter = instrumenter;
-//      requestContext.context = context;
-//      requestContext.request = request;
-//      requestContext.throwable = throwable;
-//    }
-//  }
   @SuppressWarnings("unchecked")
   public static AerospikeRequestContext current() {
     return contextThreadLocal.get();
