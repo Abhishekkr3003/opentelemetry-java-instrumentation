@@ -30,7 +30,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-public class AerospikeClientSyncCommandInstrumentation implements TypeInstrumentation {
+public class SyncCommandInstrumentation implements TypeInstrumentation {
   @Override
   public ElementMatcher<TypeDescription> typeMatcher() {
     return named("com.aerospike.client.AerospikeClient");
@@ -55,6 +55,13 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
             .and(not(takesArgument(0, named("com.aerospike.client.async.EventLoop"))))
             .and(not(returns(named("com.aerospike.client.Record")))),
         this.getClass().getName() + "$SyncNonReturnCommandAdvice");
+
+    transformer.applyAdviceToMethod(
+        isMethod()
+            .and(isPublic())
+            .and(not(isStatic())).and(isFinal()).and(named("scanAll"))
+            .and(not(takesArgument(0, named("com.aerospike.client.async.EventLoop")))),
+        this.getClass().getName() + "$SyncScanAllCommandAdvice");
   }
 
   @SuppressWarnings("unused")
@@ -134,6 +141,53 @@ public class AerospikeClientSyncCommandInstrumentation implements TypeInstrument
         return null;
       }
       request = AerospikeRequest.create(methodName.toUpperCase(Locale.ROOT), key);
+      if (!instrumenter().shouldStart(parentContext, request)) {
+        return null;
+      }
+      context = instrumenter().start(parentContext, request);
+      scope = context.makeCurrent();
+      return AerospikeRequestContext.attach(request, context);
+    }
+
+    @Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
+    public static AerospikeRequestContext stopSpan(
+        @Advice.Thrown Throwable throwable,
+        @Advice.Enter AerospikeRequestContext requestContext,
+        @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
+        @Advice.Local("otelContext") Context context,
+        @Advice.Local("otelScope") Scope scope) {
+      if (throwable != null) {
+        request.setStatus(FAILURE);
+      } else {
+        request.setStatus(SUCCESS);
+      }
+      if (scope == null) {
+        return requestContext;
+      }
+
+      scope.close();
+      if (requestContext != null) {
+        requestContext.endSpan(instrumenter(), context, request, throwable);
+        requestContext.detachAndEnd();
+      }
+      return requestContext;
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public static class SyncScanAllCommandAdvice {
+
+    @Advice.OnMethodEnter(suppress = Throwable.class)
+    public static AerospikeRequestContext onEnter(
+        @Advice.Origin("#m") String methodName,
+        @Advice.Argument(1) String namespace,
+        @Advice.Argument(2) String setName,
+        @Advice.Local("otelAerospikeRequest") AerospikeRequest request,
+        @Advice.Local("otelContext") Context context,
+        @Advice.Local("otelScope") Scope scope) {
+      Context parentContext = currentContext();
+
+      request = AerospikeRequest.create(methodName.toUpperCase(Locale.ROOT), namespace, setName);
       if (!instrumenter().shouldStart(parentContext, request)) {
         return null;
       }

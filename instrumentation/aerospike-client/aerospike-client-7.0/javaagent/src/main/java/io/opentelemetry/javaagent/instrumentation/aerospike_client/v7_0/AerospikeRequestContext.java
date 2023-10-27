@@ -16,12 +16,8 @@ public final class AerospikeRequestContext {
   private AerospikeRequestContext() {}
 
   public static AerospikeRequestContext attach(AerospikeRequest request, Context context) {
-    AerospikeRequestContext requestContext = current();
-    // if there already is an active request context don't start a new one
-    if (requestContext != null) {
-      return null;
-    }
-    requestContext = new AerospikeRequestContext();
+
+    AerospikeRequestContext requestContext = new AerospikeRequestContext();
     requestContext.request = request;
     requestContext.context = context;
     contextThreadLocal.set(requestContext);

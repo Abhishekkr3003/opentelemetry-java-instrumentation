@@ -6,14 +6,13 @@
 package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
 
 import com.aerospike.client.cluster.Node;
-import io.opentelemetry.instrumentation.api.instrumenter.network.NetworkAttributesGetter;
 import io.opentelemetry.instrumentation.api.instrumenter.network.ServerAttributesGetter;
 import java.net.InetSocketAddress;
 import javax.annotation.Nullable;
 
-final class AerospikeClientNetworkAttributesGetter implements
+final class NetworkAttributesGetter implements
     ServerAttributesGetter<AerospikeRequest, Void>,
-    NetworkAttributesGetter<AerospikeRequest, Void> {
+    io.opentelemetry.instrumentation.api.instrumenter.network.NetworkAttributesGetter<AerospikeRequest, Void> {
 
   @Override
   @Nullable

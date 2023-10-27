@@ -8,7 +8,7 @@ import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.db.AerospikeSemanticAttributes;
 import javax.annotation.Nullable;
 
-public class AerospikeAttributeExtractor implements
+public class AerospikeClientAttributeExtractor implements
     AttributesExtractor<AerospikeRequest, Void> {
 
   @Override

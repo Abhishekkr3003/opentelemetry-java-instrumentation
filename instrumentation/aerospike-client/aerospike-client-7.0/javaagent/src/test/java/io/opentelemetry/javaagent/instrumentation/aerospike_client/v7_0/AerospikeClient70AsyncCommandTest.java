@@ -70,11 +70,11 @@ class AerospikeClient70AsyncCommandTest {
         trace ->
             trace.hasSpansSatisfyingExactly(
                 span ->
-                    span.hasName("WRITE")
+                    span.hasName("ASYNCWRITE")
                         .hasKind(SpanKind.CLIENT)
                         .hasAttributesSatisfyingExactly(
                             equalTo(SemanticAttributes.DB_SYSTEM, "aerospike"),
-                            equalTo(SemanticAttributes.DB_OPERATION, "WRITE"),
+                            equalTo(SemanticAttributes.DB_OPERATION, "ASYNCWRITE"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
@@ -97,11 +97,11 @@ class AerospikeClient70AsyncCommandTest {
         trace ->
             trace.hasSpansSatisfyingExactly(
                 span ->
-                    span.hasName("READ")
+                    span.hasName("ASYNCREAD")
                         .hasKind(SpanKind.CLIENT)
                         .hasAttributesSatisfyingExactly(
                             equalTo(SemanticAttributes.DB_SYSTEM, "aerospike"),
-                            equalTo(SemanticAttributes.DB_OPERATION, "READ"),
+                            equalTo(SemanticAttributes.DB_OPERATION, "ASYNCREAD"),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
                             equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
                             equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),

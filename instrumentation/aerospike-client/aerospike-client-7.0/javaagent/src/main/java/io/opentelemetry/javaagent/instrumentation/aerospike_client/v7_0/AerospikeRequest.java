@@ -16,12 +16,20 @@ public abstract class AerospikeRequest {
   private Status status;
 
   public static AerospikeRequest create(String operation, Key key) {
-    return new AutoValue_AerospikeRequest(operation, key);
+    return new AutoValue_AerospikeRequest(operation, key.namespace, key.setName, key.userKey.toString());
+  }
+
+  public static AerospikeRequest create(String operation, String namespace, String set) {
+    return new AutoValue_AerospikeRequest(operation, namespace, set, null);
   }
 
   public abstract String getOperation();
 
-  public abstract Key getKey();
+  public abstract String getNamespace();
+
+  public abstract String getSet();
+
+  public abstract String getUserKey();
 
   public void setNode(Node node) {
     this.node = node;
@@ -29,30 +37,6 @@ public abstract class AerospikeRequest {
 
   public Node getNode() {
     return this.node;
-  }
-
-  public String getNamespace() {
-    Key key = getKey();
-    if (key != null) {
-      return key.namespace;
-    }
-    return null;
-  }
-
-  public String getSet() {
-    Key key = getKey();
-    if (key != null) {
-      return key.setName;
-    }
-    return null;
-  }
-
-  public String getUserKey() {
-    Key key = getKey();
-    if (key != null) {
-      return key.userKey.toString();
-    }
-    return null;
   }
 
   public Integer getSize() {

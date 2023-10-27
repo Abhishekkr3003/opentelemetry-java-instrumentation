@@ -29,12 +29,12 @@ public class AerospikeClientInstrumentationModule extends InstrumentationModule 
   @Override
   public List<TypeInstrumentation> typeInstrumentations() {
     return asList(
-        new AerospikeClientSyncCommandInstrumentation(),
-        new AerospikeNodeInstrumentation(),
-        new AerospikeDataSizeIntrumentation(),
-        new AerospikeClientAsyncWriteCommandInstrumentation(),
-        new AerospikeClientAsyncHandlerInstrumentation(),
-        new AerospikeClientAsyncReadCommandInstrumentation()
+        new SyncCommandInstrumentation(),
+        new SocketInstrumentation(),
+        new TransferSizeIntrumentation(),
+        new AsyncCommandInstrumentation(),
+        new AsyncHandlerInstrumentation()
+//        new AerospikeClientAsyncReadCommandInstrumentation()
     );
   }
 

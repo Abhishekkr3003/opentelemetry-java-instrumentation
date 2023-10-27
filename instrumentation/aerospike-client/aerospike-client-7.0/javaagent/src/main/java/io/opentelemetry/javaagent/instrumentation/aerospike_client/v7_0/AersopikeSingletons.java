@@ -22,15 +22,15 @@ public final class AersopikeSingletons {
   private static final Instrumenter<AerospikeRequest, Void> INSTRUMENTER;
 
   static {
-    AerospikeDbAttributesGetter dbAttributesGetter = new AerospikeDbAttributesGetter();
-    AerospikeClientNetworkAttributesGetter netAttributesGetter = new AerospikeClientNetworkAttributesGetter();
+    DbAttributesGetter dbAttributesGetter = new DbAttributesGetter();
+    NetworkAttributesGetter netAttributesGetter = new NetworkAttributesGetter();
 
     INSTRUMENTER =
         Instrumenter.<AerospikeRequest, Void>builder(
                 GlobalOpenTelemetry.get(),
                 INSTRUMENTATION_NAME,
                 DbClientSpanNameExtractor.create(dbAttributesGetter))
-            .addAttributesExtractor(new AerospikeAttributeExtractor())
+            .addAttributesExtractor(new AerospikeClientAttributeExtractor())
             .addAttributesExtractor(DbClientAttributesExtractor.create(dbAttributesGetter))
             .addAttributesExtractor(ServerAttributesExtractor.create(netAttributesGetter))
             .addAttributesExtractor(NetworkAttributesExtractor.create(netAttributesGetter))

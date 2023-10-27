@@ -9,7 +9,7 @@ import io.opentelemetry.instrumentation.api.instrumenter.db.AerospikeSemanticAtt
 import io.opentelemetry.instrumentation.api.instrumenter.db.DbClientAttributesGetter;
 import javax.annotation.Nullable;
 
-final class AerospikeDbAttributesGetter implements DbClientAttributesGetter<AerospikeRequest> {
+final class DbAttributesGetter implements DbClientAttributesGetter<AerospikeRequest> {
 
   @Override
   public String getSystem(AerospikeRequest request) {
