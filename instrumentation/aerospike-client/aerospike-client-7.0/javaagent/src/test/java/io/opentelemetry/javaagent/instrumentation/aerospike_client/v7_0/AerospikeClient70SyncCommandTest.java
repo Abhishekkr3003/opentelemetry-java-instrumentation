@@ -79,6 +79,32 @@ class AerospikeClient70SyncCommandTest {
   }
 
   @Test
+  void scanAllCommand() {
+//    Key aerospikeKey = new Key("test", "test-set", "data1");
+    aerospikeClient.scanAll(null, "test", "test-set", null, "bin1");
+
+    testing.waitAndAssertTraces(
+        trace ->
+            trace.hasSpansSatisfyingExactly(
+                span ->
+                    span.hasName("SCANALL")
+                        .hasKind(SpanKind.CLIENT)
+                        .hasAttributesSatisfyingExactly(
+                            equalTo(SemanticAttributes.DB_SYSTEM, "aerospike"),
+                            equalTo(SemanticAttributes.DB_OPERATION, "SCANALL"),
+                            equalTo(SemanticAttributes.NET_SOCK_PEER_PORT, port),
+                            equalTo(SemanticAttributes.NET_SOCK_PEER_ADDR, "127.0.0.1"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE, "test"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME, "test-set"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_STATUS, "SUCCESS"),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE, 0),
+                            equalTo(AerospikeSemanticAttributes.AEROSPIKE_TRANSFER_SIZE, 5),
+                            satisfies(
+                                SemanticAttributes.NET_SOCK_PEER_NAME,
+                                val -> val.isIn("localhost", "127.0.0.1")))));
+  }
+
+  @Test
   void getCommand() {
     Key aerospikeKey = new Key("test", "test-set", "data1");
     List<String> bins = singletonList("bin1");

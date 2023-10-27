@@ -8,6 +8,7 @@ package io.opentelemetry.javaagent.instrumentation.aerospike_client.v7_0;
 import com.aerospike.client.Key;
 import com.aerospike.client.cluster.Node;
 import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
 
 @AutoValue
 public abstract class AerospikeRequest {
@@ -29,6 +30,7 @@ public abstract class AerospikeRequest {
 
   public abstract String getSet();
 
+  @Nullable
   public abstract String getUserKey();
 
   public void setNode(Node node) {
