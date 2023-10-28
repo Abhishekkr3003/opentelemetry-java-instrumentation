@@ -46,7 +46,7 @@ public final class AerospikeMetrics implements OperationListener {
             .counterBuilder("aerospike.response")
             .setDescription("Aerospike Responses");
     AerospikeMetricsAdvice.applyResponseCounterAdvice(responseCounterBuilder);
-    responseCounter = requestCounterBuilder.build();
+    responseCounter = responseCounterBuilder.build();
     LongUpDownCounterBuilder concurrencyUpDownCounterBuilder =
         meter
             .upDownCounterBuilder("aerospike.concurrreny")
@@ -66,7 +66,7 @@ public final class AerospikeMetrics implements OperationListener {
             .setDescription("Aerospike Record Size")
             .setUnit("By");
     AerospikeMetricsAdvice.applyRecordSizeAdvice(recordSizeHistogramBuilder);
-    recordSizeHistogram = durationBuilder.build();
+    recordSizeHistogram = recordSizeHistogramBuilder.build();
   }
 
   public static OperationMetrics get() {
@@ -77,6 +77,7 @@ public final class AerospikeMetrics implements OperationListener {
   @Override
   public Context onStart(Context context, Attributes startAttributes, long startNanos) {
     requestCounter.add(1, startAttributes, context);
+    concurrencyUpDownCounter.add(1, startAttributes, context);
     return context.with(
         AEROSPIKE_CLIENT_METRICS_STATE,
         new AutoValue_AerospikeMetrics_State(startAttributes, startNanos));
@@ -92,9 +93,9 @@ public final class AerospikeMetrics implements OperationListener {
           context);
       return;
     }
+    concurrencyUpDownCounter.add(-1, state.startAttributes(), context);
     Attributes mergedAttributes = state.startAttributes().toBuilder().putAll(endAttributes).build();
     responseCounter.add(1, mergedAttributes, context);
-    concurrencyUpDownCounter.add(-1, mergedAttributes, context);
     clientLatencyHistogram.record(
         (endNanos - state.startTimeNanos()) / NANOS_PER_MS,
         mergedAttributes,

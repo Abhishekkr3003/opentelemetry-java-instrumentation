@@ -34,9 +34,9 @@ final class AerospikeMetricsAdvice {
       attributes.add(SemanticAttributes.SERVER_PORT);
     }
     if (SemconvStability.emitOldHttpSemconv()) {
-      attributes.add(SemanticAttributes.NET_PEER_NAME);
-      attributes.add(SemanticAttributes.NET_PEER_PORT);
-      attributes.add(SemanticAttributes.NET_TRANSPORT);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_ADDR);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_NAME);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_PORT);
     }
 
     ((ExtendedLongCounterBuilder) builder).setAttributesAdvice(attributes);
@@ -61,9 +61,9 @@ final class AerospikeMetricsAdvice {
       attributes.add(SemanticAttributes.SERVER_PORT);
     }
     if (SemconvStability.emitOldHttpSemconv()) {
-      attributes.add(SemanticAttributes.NET_PEER_NAME);
-      attributes.add(SemanticAttributes.NET_PEER_PORT);
-      attributes.add(SemanticAttributes.NET_TRANSPORT);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_ADDR);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_NAME);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_PORT);
     }
 
     ((ExtendedLongUpDownCounterBuilder) builder).setAttributesAdvice(attributes);
@@ -90,9 +90,9 @@ final class AerospikeMetricsAdvice {
       attributes.add(SemanticAttributes.SERVER_PORT);
     }
     if (SemconvStability.emitOldHttpSemconv()) {
-      attributes.add(SemanticAttributes.NET_PEER_NAME);
-      attributes.add(SemanticAttributes.NET_PEER_PORT);
-      attributes.add(SemanticAttributes.NET_TRANSPORT);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_ADDR);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_NAME);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_PORT);
     }
 
     ((ExtendedLongCounterBuilder) builder).setAttributesAdvice(attributes);
@@ -111,6 +111,7 @@ final class AerospikeMetricsAdvice {
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME);
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY);
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_STATUS);
+    attributes.add(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE);
     if (SemconvStability.emitStableHttpSemconv()) {
       attributes.add(SemanticAttributes.NETWORK_TYPE);
       attributes.add(SemanticAttributes.NETWORK_TRANSPORT);
@@ -118,9 +119,9 @@ final class AerospikeMetricsAdvice {
       attributes.add(SemanticAttributes.SERVER_PORT);
     }
     if (SemconvStability.emitOldHttpSemconv()) {
-      attributes.add(SemanticAttributes.NET_PEER_NAME);
-      attributes.add(SemanticAttributes.NET_PEER_PORT);
-      attributes.add(SemanticAttributes.NET_TRANSPORT);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_ADDR);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_NAME);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_PORT);
     }
 
     ((ExtendedDoubleHistogramBuilder) builder).setAttributesAdvice(attributes);
@@ -138,6 +139,8 @@ final class AerospikeMetricsAdvice {
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_NAMESPACE);
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_SET_NAME);
     attributes.add(AerospikeSemanticAttributes.AEROSPIKE_USER_KEY);
+    attributes.add(AerospikeSemanticAttributes.AEROSPIKE_ERROR_CODE);
+    attributes.add(AerospikeSemanticAttributes.AEROSPIKE_STATUS);
     if (SemconvStability.emitStableHttpSemconv()) {
       attributes.add(SemanticAttributes.NETWORK_TYPE);
       attributes.add(SemanticAttributes.NETWORK_TRANSPORT);
@@ -145,9 +148,9 @@ final class AerospikeMetricsAdvice {
       attributes.add(SemanticAttributes.SERVER_PORT);
     }
     if (SemconvStability.emitOldHttpSemconv()) {
-      attributes.add(SemanticAttributes.NET_PEER_NAME);
-      attributes.add(SemanticAttributes.NET_PEER_PORT);
-      attributes.add(SemanticAttributes.NET_TRANSPORT);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_ADDR);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_NAME);
+      attributes.add(SemanticAttributes.NET_SOCK_PEER_PORT);
     }
 
     ((ExtendedDoubleHistogramBuilder) builder).setAttributesAdvice(attributes);
