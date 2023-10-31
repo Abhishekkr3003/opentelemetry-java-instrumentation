@@ -1,0 +1,21 @@
+apply from: "$rootDir/gradle/instrumentation.gradle"
+
+muzzle {
+  pass {
+    group.set("io.grpc")
+    module.set("grpc-xds")
+    versions.set("[1.59.0,)")
+    assertInverse.set(true)
+  }
+  pass {
+    group.set("io.grpc")
+    module.set("grpc-core")
+    versions.set("[1.59.0,)")
+    assertInverse.set(true)
+  }
+}
+
+dependencies {
+  implementation "io.grpc:grpc-core:1.59.0"
+  implementation "io.grpc:grpc-xds:1.59.0"
+}

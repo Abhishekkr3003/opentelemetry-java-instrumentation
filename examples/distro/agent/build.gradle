@@ -31,6 +31,7 @@ dependencies {
 
   javaagentLibs(project(":custom"))
   javaagentLibs(project(":instrumentation:servlet-3"))
+  javaagentLibs(project(":instrumentation:grpc-xds"))
 
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:${versions.opentelemetryJavaagent}")
 }
